@@ -1,32 +1,52 @@
-# Simple Commands System
-#### A custom system made to allow easy installation of chat command packs that allows advanced customized behavior, and allows quick and easy modification for server owners.
+# pxCommands
 
-This system is designed to be one universal method of creating and using simple interaction commands, and to replace old and copy-pasted methods released in the past.
-
-It provides server owners with a simple way of installing and configuring their commands.
-
----
+A modular chat and command system for FiveM supporting ESX, QBCore, QBox, and standalone servers.
 
 ## Features
-* Framework compatiblity (vRP & ESX)
-* Automatic name formatting based on server frameworks
-* Easy configuration
-* Simple drag-and-drop installation
-* Universal bridge between chat commands and frameworks
-* Potentially powerful API, yet also simple to use.
 
----
+- Framework agnostic with explicit configuration
+- Modular architecture (commands, modules, system)
+- Event namespace (`pxc:*`)
+- Server-side security enforcement
+- Automatic command help and suggestions
+- Range-based proximity messaging
+
+## Quick Start
+
+1. Place `pxCommands` in your resources folder
+2. Add `ensure pxCommands` to `server.cfg`
+3. Edit `settings.lua` with your framework:
+   ```lua
+   Config.Framework = 'esx'  -- or 'qbcore', 'qbox', 'standalone'
+   ```
+4. Create command packs in `commands/` folder
+
+Full setup guide: [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
+
+## Command Packs
+
+Create `.lua` files in `commands/`:
+
+```lua
+CommandPack("MyPack", "AuthorName", {
+    {
+        command = "hello",
+        format = "#name# says hello!",
+        help = "Say hello",
+    },
+})
+```
+
+Full reference: [docs/COMMAND_PACKS.md](docs/COMMAND_PACKS.md)
 
 ## Documentation
-- [Information](https://help.toxicdev.me/internal/commands-system/)
-- [Installation](https://help.toxicdev.me/internal/commands-system/install)
-- [Settings](https://help.toxicdev.me/internal/commands-system/settings)
-- [Updates](https://help.toxicdev.me/internal/commands-system/updates)
-- [Command Packs](https://help.toxicdev.me/examples/command-packs/)
-- [Example Command Pack](https://help.toxicdev.me/internal/commands-system/example-pack/)
-- [Creating a Command Pack](https://help.toxicdev.me/internal/commands-system/create-pack/)
 
----
+| Doc | Purpose |
+|-----|---------|
+| [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) | Installation and first steps |
+| [docs/COMMAND_PACKS.md](docs/COMMAND_PACKS.md) | How to create commands |
+| [docs/CONFIG_REFERENCE.md](docs/CONFIG_REFERENCE.md) | All configuration options |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Technical structure |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues |
+| [.github/SECURITY.md](.github/SECURITY.md) | Security policy |
 
-## Support
-- [Discord](https://redirect.toxicdev.me/discord)

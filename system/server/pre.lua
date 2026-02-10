@@ -1,6 +1,6 @@
 function log(text)
-    if SETTINGS.logging then
-        print("^3[Chat Commands] ^7" .. text .. "^7")
+    if Config and Config.Logging then
+        print("[pxCommands] " .. text)
     end
 end
 
@@ -12,33 +12,30 @@ function shallowcopy(orig)
         for orig_key, orig_value in pairs(orig) do
             copy[orig_key] = orig_value
         end
-    else -- number, string, boolean, etc
+    else
         copy = orig
     end
     return copy
 end
 
 ESX = nil
-vRP = nil
-vRPclient = nil
+QBCore = nil
 
--- vRP compatibility
-if SETTINGS.use_vrp then
-    log("Enabling vRP compatibility")
-    local Proxy = module("vrp", "lib/Proxy")
-    local Tunnel = module("vrp", "lib/Tunnel")
-    vRP = Proxy.getInterface("vRP")
-    vRPclient = Tunnel.getInterface("vRP","chat_commands")
-    log("vRP compatibility enabled")
-end
-
--- ESX compatibility
-if SETTINGS.use_esx then
-    log("Enabling ESX compatibility")
+if Config.Framework == 'esx' then
+    log('Enabling ESX compatibility')
     while not ESX do
         TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+        Citizen.Wait(0)
     end
-    log("ESX compatibility enabled")
+    log('ESX enabled')
+elseif Config.Framework == 'qbcore' or Config.Framework == 'qbox' then
+    log('Enabling QBCore compatibility')
+    if exports and exports['qb-core'] then
+        QBCore = exports['qb-core']:GetCoreObject()
+        log('QBCore enabled')
+    else
+        log('QBCore export not found')
+    end
 end
 
 COMMANDS = {}
@@ -46,8 +43,6 @@ COMMANDS = {}
 local function AddCommand(command)
     if not command.command then return "Missing command parameter" end
     if not command.format and not command.reply then return "Missing format parameter" end
-    if command.reply and (command.cb or command.hidden or command.usage) then log("Warning! Using reply will stop the command from executing fully!") end
-    log(("Added /%s"):format(command.command))
     table.insert(COMMANDS, command)
     return nil
 end
@@ -58,16 +53,13 @@ local function AddAlias(alias, commandName)
             local aliasCommand = shallowcopy(command)
             aliasCommand.command = alias
             table.insert(COMMANDS, aliasCommand)
-            log(("Added alias /%s for /%s"):format(alias, commandName))
             return true
         end
     end
-    log(("Could not create alias /%s for /%s: %s"):format(alias, commandName, "Command does not exist"))
     return false
 end
 
 function CommandPack(packName, packAuthor, commands, defaults, aliases)
-    log(("== Loading command pack %s by %s =="):format(packName, packAuthor))
     for _, command in next, commands do
         command.author = packAuthor
         command.pack = packName
@@ -87,12 +79,9 @@ function CommandPack(packName, packAuthor, commands, defaults, aliases)
         for _, alias in next, aliases do
             if alias[1] and alias[2] then
                 AddAlias(alias[1], alias[2])
-            else
-                log("Malformed alias")
             end
         end
     end
-    log(("== Pack loaded with %s command%s =="):format(#commands, #commands == 1 and "" or "s"))
 end
 
-log("Starting chat command loading process")
+log('Starting pxCommands load')
