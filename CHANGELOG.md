@@ -18,9 +18,11 @@
 - Modern `fxmanifest.lua` (cerulean format)
 - Support for ESX, QBCore, QBox, and standalone frameworks
 - Modular architecture with clean separation of concerns
-- pxCommands event namespace throughout
+- pxc event namespace throughout
 - Enhanced SECURITY.md policy
 - Contributing guidelines
+- Complete user guides: GETTING_STARTED.md, COMMAND_PACKS.md, CONFIG_REFERENCE.md, TROUBLESHOOTING.md
+- docs/README.md navigation hub for documentation
 
 ### Changed
 - Rebranded from `chat_commands` to `pxCommands`
@@ -30,10 +32,13 @@
 - Autoupdate redirects to GitHub releases instead of file updates
 - Documentation reorganized: `.github/` for repo docs, `docs/` for guides
 - Replaced global `SETTINGS` with structured `Config` table
-- settings.lua now acts as override/customization file instead of config source
 - Improved framework detection with explicit export checking
 - Enhanced logging with config-aware defaults
 - README.md moved to .github/ (GitHub auto-discovers)
+- Event namespace shortened to `pxc:*` (pxc:proximity, pxc:showFloatingText)
+- Fixed script execution order in fxmanifest.lua
+- Removed settings.lua override file; configuration now directly in system/config.lua
+- Removed FXServer version check system (no longer required)
 
 ### Fixed
 - Fixed variable scope issue in ESX command registration (raw variable)
@@ -41,9 +46,16 @@
 - Removed busy-wait loops in version check
 - Dead links and outdated documentation removed
 - Updated all doc cross-references to point to correct paths
+- Fixed Lua type diagnostics: SetTextProportional and SetTextCentre now use boolean instead of integer
+- Fixed GetDistanceBetweenCoords last parameter type (boolean instead of integer)
+- Added MySQL type annotation to prevent undefined global diagnostics
+- Fixed command registration execution order (pre.lua → commands/*.lua → commands.lua)
 
 ### Removed
 - Static version file from version checks (now uses GitHub releases)
 - vRP compatibility (deprecated; use ESX, QBCore, or QBox)
 - Old toxicdev.me documentation references
 - Corrupted dual-content in README
+- FXServer version check enforcement (fxcheck_1226.lua)
+- settings.lua configuration file (use system/config.lua directly)
+- Dynamic module auto-loading (sv_*.lua, sh_*.lua patterns)

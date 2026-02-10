@@ -11,7 +11,7 @@
 
 ## Configuration
 
-Basic setup in `settings.lua`:
+Basic setup in `system/config.lua`:
 
 ```lua
 Config.Framework = 'esx'  -- 'esx', 'qbcore', 'qbox', or 'standalone'

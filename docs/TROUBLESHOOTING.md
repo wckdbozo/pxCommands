@@ -14,7 +14,7 @@
 
 **Problem**: Admin commands work for everyone
 
-**Solution**: Configure `Config.AdminCheck` in `settings.lua`:
+**Solution**: Configure `Config.AdminCheck` in `system/config.lua`:
 
 ```lua
 Config.AdminCheck = function(source)
@@ -92,7 +92,7 @@ end
 
 **Problem**: `Config.Framework` shows as detected but features fail
 
-**Solution**: Check `settings.lua` override:
+**Solution**: Check `system/config.lua` settings:
 
 ```lua
 Config.Framework = 'esx'  -- Explicitly set the framework
@@ -114,7 +114,5 @@ Do not rely on auto-detection if overriding in settings.
 ## Uninstalling or Updating
 
 1. Stop resource: `stop pxCommands`
-2. Backup `settings.lua` if customized
-3. Replace resource folder with new version
-4. Restore `settings.lua`
-5. Start: `start pxCommands`
+2. Replace resource folder with new version
+3. Start: `start pxCommands`

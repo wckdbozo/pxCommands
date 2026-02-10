@@ -123,8 +123,4 @@ for _, command in next, COMMANDS do
     end
 end
 
-if not Config.FXServerCheck then
-    log("Unsupported FXServer version")
-    log("Required: FXServer 1226 or newer")
-    log("Current: " .. GetConvar("version", ""))
-end
+

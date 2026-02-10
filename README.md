@@ -18,7 +18,7 @@ A modular chat and command system for FiveM supporting ESX, QBCore, QBox, and st
 
 1. Place `pxCommands` in your resources folder
 2. Add `ensure pxCommands` to `server.cfg`
-3. Edit `settings.lua` with your framework:
+3. Edit `system/config.lua` with your framework:
    ```lua
    Config.Framework = 'esx'  -- or 'qbcore', 'qbox', 'standalone'
    ```

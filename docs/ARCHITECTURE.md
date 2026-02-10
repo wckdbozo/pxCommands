@@ -7,15 +7,12 @@ system/
 ├── config.lua                   Shared configuration table
 ├── server/
 │   ├── pre.lua                  Initialization, framework setup, helpers
-│   ├── commands.lua             Command registration and handler
-│   └── fxcheck_*.lua            Version checks (executed last)
+│   └── commands.lua             Command registration and handler
 ├── client/
 │   └── proximity.lua            Range-based message broadcast
 └── versioncheck.lua             Update checking and autoupdate
 modules/
-├── cl_*.lua                     Client modules (auto-loaded)
-├── sv_*.lua                     Server modules (auto-loaded)
-└── sh_*.lua                     Shared modules (auto-loaded)
+└── cl_*.lua                     Client modules (auto-loaded)
 commands/
 └── *.lua                        Command packs (auto-loaded)
 ```
@@ -24,13 +21,8 @@ commands/
 
 1. `fxmanifest.lua` loads all scripts in order
 2. `system/config.lua` initializes Config table
-3. `settings.lua` allowed to override Config
-4. `system/server/pre.lua` runs framework detection and init
-5. Any module files load based on pattern
-6. Command pack files load from `commands/`
-7. `system/server/fxcheck_*.lua` validates environment
-8. `system/server/commands.lua` registers all commands
-9. `system/versioncheck.lua` checks for updates
+
+**Client:** `modules/cl_*.lua` client modules load in parallel with server
 
 ## Data Flow
 
@@ -60,11 +52,7 @@ onCommandExecuted hook (if set)
 
 ## Configuration
 
-Config is a global shared table. Modify in:
-- `system/config.lua` (defaults)
-- `settings.lua` (user overrides)
-
-All fields optional; library provides sensible defaults.
+Config is a global shared table. Modify in `system/config.lua`.
 
 ## Security Model
 
@@ -92,12 +80,38 @@ All fields optional; library provides sensible defaults.
 
 ## Extending pxCommands
 
+### Custom Command Packs
+
+The primary extension method is creating command packs in `commands/*.lua`:
+
+```lua
+CommandPack("MyCustom", "AuthorName", {
+    {
+        command = "mycommand",
+        help = "My custom command",
+        format = "#username# did something",
+        cb = function(source, message, command, args, raw)
+            -- Your custom logic here
+        end
+    }
+})
+```
+
+See [COMMAND_PACKS.md](./COMMAND_PACKS.md) for detailed documentation.
+
 ### Custom Modules
 
-Drop `.lua` files into `modules/` and they auto-load via pattern:
-- `cl_*.lua` → Client (shared)
-- `sv_*.lua` → Server (shared)
-- `sh_*.lua` → Shared
+To add custom server or shared modules, manually add them to `fxmanifest.lua`:
+
+```lua
+server_scripts {
+    'system/server/pre.lua',
+    'commands/*.lua',
+    'modules/my_custom_module.lua',  -- Add here
+    'system/server/commands.lua',
+    'system/versioncheck.lua'
+}
+```
 
 ### Custom Admin Logic
 

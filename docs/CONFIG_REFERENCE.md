@@ -1,6 +1,6 @@
 # Configuration Reference
 
-All config options live in `system/config.lua`. Override any value in `settings.lua`.
+All config options are defined in `system/config.lua`. Edit this file directly to customize behavior.
 
 ## Framework Selection
 
@@ -89,19 +89,11 @@ Parameters:
 - `args`: Argument table (split by spaces)
 - `raw`: Raw input string from RegisterCommand
 
-## Server Version Check
 
-```lua
-Config.FXServerCheck
-```
-
-Read-only. Set by `system/server/fxcheck_1226.lua` to validate minimum FXServer version (1226+).
-
-Do not modify.
 
 ## Example Override
 
-In `settings.lua`:
+Edit `system/config.lua`:
 
 ```lua
 Config.Framework = 'qbcore'

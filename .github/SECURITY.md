@@ -26,7 +26,7 @@ We aim to:
 ### Server Configuration
 
 1. **Enable ACL enforcement** — Use FXServer's ACL system for robust admin control in standalone mode.
-2. **Validate framework settings** — Ensure `framework` in `settings.lua` matches your actual server setup.
+2. **Validate framework settings** — Ensure `Config.Framework` in `system/config.lua` matches your server setup.
 3. **Restrict database access** — Use role-based database credentials (ESX/QBCore).
 4. **Keep FXServer updated** — Minimum version 1226 or newer recommended.
 

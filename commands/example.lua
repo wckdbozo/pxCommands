@@ -1,4 +1,4 @@
-CommandPack("Example", "pxCommands", {
+CommandPack("Example", "CodeMeAPixel", {
     {
         command = "test",
         format = "#name# used /test",

@@ -10,7 +10,6 @@ repository 'https://github.com/CodeMeAPixel/pxCommands'
 version '0.1.0'
 
 shared_scripts {
-    'settings.lua',
     'system/config.lua'
 }
 
@@ -20,8 +19,10 @@ client_scripts {
 }
 
 server_scripts {
-    'system/versioncheck.lua',
-    'system/server/**'
+    'system/server/pre.lua',
+    'commands/*.lua',
+    'system/server/commands.lua',
+    'system/versioncheck.lua'
 }
 
 

@@ -75,7 +75,7 @@ end
 
 ### Global Execution Hook
 
-Set in `settings.lua`:
+Set in `system/config.lua`:
 
 ```lua
 Config.Callbacks.onCommandExecuted = function(source, message, command, args, raw)
