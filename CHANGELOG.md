@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased] — 02-22-2026
+## [0.2.0] — 02-22-2026
 
 ### Added
 - `Config.Callbacks.onCommandFailed` callback with reason string: `prereq`, `permission`, `cooldown`, `invalid_args`, `no_args`
@@ -91,3 +91,4 @@
 - FXServer version check enforcement (fxcheck_1226.lua)
 - settings.lua configuration file (use system/config.lua directly)
 - Dynamic module auto-loading (sv_*.lua, sh_*.lua patterns)
+
