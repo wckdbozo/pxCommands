@@ -2,22 +2,43 @@
 
 ## Installation
 
-1. Clone or download the resource into your resources folder
-2. Add to `server.cfg`:
+1. Download the latest release from [GitHub Releases](https://github.com/CodeMeAPixel/pxCommands/releases) or use the build script (see below)
+2. Extract the `pxCommands` folder into your server's `resources/` directory
+3. Add to `server.cfg`:
    ```
    ensure pxCommands
    ```
-3. Start or restart your server
+4. Start or restart your server
+
+## Building from Source
+
+A PowerShell build script is included to generate a clean deployable copy:
+
+```powershell
+.\build.ps1
+```
+
+Outputs:
+- `dist/pxCommands/` — unzipped resource ready to drop into your server
+- `dist/pxCommands-vX.X.X.zip` — zipped release archive
+
+The version is read automatically from `fxmanifest.lua`. You can also pass it explicitly:
+
+```powershell
+.\build.ps1 -Version "1.0.0"
+```
 
 ## Configuration
 
-Basic setup in `system/config.lua`:
+Open `system/config.lua` and set your framework:
 
 ```lua
 Config.Framework = 'esx'  -- 'esx', 'qbcore', 'qbox', or 'standalone'
-Config.CheckUpdates = true
-Config.Logging = true
+```
 
+Configure an admin check to gate admin commands:
+
+```lua
 Config.AdminCheck = function(source)
     if Config.Framework == 'esx' and ESX then
         local player = ESX.GetPlayerFromId(source)
@@ -27,6 +48,45 @@ Config.AdminCheck = function(source)
 end
 ```
 
+## Built-in Command Packs
+
+Two packs are included and active by default:
+
+### Roleplay (`commands/roleplay.lua`)
+
+| Command | Description | Range |
+|---------|-------------|-------|
+| `/me` | Roleplay action | 25m |
+| `/do` | Describe environment | 25m |
+| `/low` | Whisper | 5m |
+| `/shout` | Shout | 75m |
+| `/ooc` | Out of character | Global |
+| `/tweet` | Post a tweet (280 char max) | Global |
+| `/911` | Call emergency services | Global |
+
+### Admin (`commands/admin.lua`)
+
+| Command | Description |
+|---------|-------------|
+| `/announce` | Broadcast to all players |
+| `/staffchat` | Message visible only to admins |
+| `/kick` | Kick a player with reason |
+| `/warn` | Send a warning notification to a player |
+
+All admin commands require `Config.AdminCheck` to return `true` for the caller.
+
+To disable a pack, delete or rename the file. To create your own, see [COMMAND_PACKS.md](./COMMAND_PACKS.md).
+
+## Notifications
+
+`modules/cl_notifications.lua` is a client notification module. Trigger it from server-side:
+
+```lua
+TriggerClientEvent("pxc:notify", source, "Your message", "success")
+```
+
+Types: `success`, `error`, `warning`, `info`
+
 ## Creating Your First Command Pack
 
 Create `commands/mycommands.lua`:
@@ -34,27 +94,18 @@ Create `commands/mycommands.lua`:
 ```lua
 CommandPack("MyCommands", "myauthor", {
     {
-        command = "hello",
-        help = "Say hello to the server",
-        format = "#username# says hello!",
-        admin = false,
-        cb = function(source, message, command, args, raw)
-            print(message)
-        end
+        command  = "hello",
+        help     = "Say hello to the server",
+        format   = "#name# says hello!",
+        cooldown = 5,
     }
 })
 ```
 
-Reload scripts and type `/hello` to test.
-
-## Available Frameworks
-
-- **ESX** — Uses es:addGroupCommand for admin, fetches character names from database
-- **QBCore/QBox** — Uses built-in player object, character info available
-- **Standalone** — No framework features; uses FXServer ACL for admin
+Restart the resource and type `/hello` to test.
 
 ## Next Steps
 
-- Read [COMMAND_PACKS.md](./COMMAND_PACKS.md) for detailed command options
-- Read [ARCHITECTURE.md](./ARCHITECTURE.md) for technical details
-- Check `commands/example.lua` for a full example
+- [COMMAND_PACKS.md](./COMMAND_PACKS.md) — full command field reference
+- [CONFIG_REFERENCE.md](./CONFIG_REFERENCE.md) — all config options
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — internals and extension points

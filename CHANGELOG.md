@@ -1,5 +1,37 @@
 # Changelog
 
+## [Unreleased] — 02-22-2026
+
+### Added
+- `Config.Callbacks.onCommandFailed` callback with reason string: `prereq`, `permission`, `cooldown`, `invalid_args`, `no_args`
+- `Config.Cooldowns.default` global cooldown setting; per-command override via `cooldown` field
+- `Config.Webhook` block: Discord embed logging via `url`, or fully custom `handler` function
+- Server-side proximity distance filtering — only players within range receive the chat event
+- `AddCommandAlias(alias, commandName)` global function for use in command packs loaded after pre.lua
+- Argument type validation: `number`, `playerId`, `string` (with `minLength`/`maxLength`)
+- Admin bypass for per-command cooldowns when `Config.AdminCheck` is configured
+- `lua54 'yes'` in fxmanifest for Lua 5.4 performance improvements
+- `commands/roleplay.lua` pack: `/me`, `/do`, `/ooc`, `/tweet`, `/911`, `/low`, `/shout` with pre-configured ranges, cooldowns, and colors
+- `commands/admin.lua` pack: `/announce`, `/staffchat`, `/kick`, `/warn` (all admin-gated)
+- `modules/cl_notifications.lua`: screen notification module with `success`, `error`, `warning`, `info` types; triggered via `pxc:notify` (server→client) or `pxc:notifyLocal` (client→self)
+
+### Changed
+- ESX framework init now uses `exports['es_extended']:getSharedObject()` (non-blocking) with legacy event fallback
+- ESX name lookup switched from `MySQL.Sync.fetchAll` (blocking) to `MySQL.Async.fetchAll`
+- `CommandPack` defaults now use nil-check instead of falsy-check, preserving explicit `false` values (e.g. `hidden = false`)
+- `fail()` in commandHandler only shows `noperm` message on actual permission/admin failures, not prereq failures
+- `shallowcopy` now deep-copies nested tables so command aliases don't share references (e.g. `args`)
+- `formatString` helper replaces duplicated token substitution logic for both `format` and `title` fields
+- `pxc:showFloatingText` client event now rejects relayed client-to-client calls
+
+### Fixed
+- Overhead text render loop used `table.remove` inside forward iteration, causing skipped entries on removal
+- Overhead text thread spun at `Wait(0)` even with no active floating text entries
+- `GetResourceMetadata` called with 2 arguments instead of the required 3
+- `triggerProximityMessage` guard added for nil `tonumber()` result
+- Proximity chat broadcast sent to all clients; now filtered server-side before dispatch
+- `/warn` admin command nil-guarded `targetId` before passing to `TriggerClientEvent`
+
 ## [0.1.0] — 02-09-2026
 
 ### Added

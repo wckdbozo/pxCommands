@@ -2,17 +2,18 @@
 
 All config options are defined in `system/config.lua`. Edit this file directly to customize behavior.
 
-## Framework Selection
+## Framework
 
 ```lua
 Config.Framework = 'standalone'
 ```
 
-Available values:
-- `'esx'` — ESX framework
-- `'qbcore'` — QBCore framework
-- `'qbox'` — QBox framework
-- `'standalone'` — No framework (FXServer ACL only)
+| Value | Description |
+|-------|-------------|
+| `'esx'` | ESX — group commands, async character name lookup |
+| `'qbcore'` | QBCore — player object, charinfo |
+| `'qbox'` | QBox — same as QBCore |
+| `'standalone'` | FXServer ACL only |
 
 ## Logging
 
@@ -20,7 +21,7 @@ Available values:
 Config.Logging = true
 ```
 
-Enable/disable server console logging of command registration and startup.
+Enables server console output for startup, command registration, and update checks.
 
 ## Version Checking
 
@@ -28,9 +29,9 @@ Enable/disable server console logging of command registration and startup.
 Config.CheckUpdates = true
 ```
 
-Enable/disable automatic checking for updates against GitHub releases at startup. Use `/pxCommands autoupdate` to manually check.
+Checks the GitHub Releases API at startup and logs whether the resource is up to date. Version is read from `fxmanifest.lua`. Use `/pxCommands autoupdate` to check manually.
 
-## Admin Permission
+## Admin Check
 
 ```lua
 Config.AdminCheck = function(source)
@@ -38,77 +39,134 @@ Config.AdminCheck = function(source)
 end
 ```
 
-Custom function to determine if a player is an admin. Receives source (player ID), returns boolean.
+Called when `command.admin = true`. Return `true` to allow, `false` to deny. Also used to bypass per-command cooldowns for admins.
 
-This is called when `command.admin = true`. Default behavior:
-- **ESX**: Checks player group == 'admin'
-- **QBCore/QBox**: Checks player gang/job
-- **Standalone**: Checks FXServer ACL
+Default (if nil): standalone ACL only.
 
-Override this to use custom admin systems.
-
-## Formatting Options
-
-### useFrameworkName
+## Formatting
 
 ```lua
-Config.Formatting.useFrameworkName = true
+Config.Formatting = {
+    showPlayerId      = true,
+    useFrameworkName  = true,
+}
 ```
 
-When true, uses character/framework name in `#name#` and `#char#` placeholders. When false, uses player username.
-
-Only works with ESX (MySQL) or QBCore/QBox (player object).
-
-### showPlayerId
-
-```lua
-Config.Formatting.showPlayerId = true
-```
-
-When true, appends player server ID in parentheses to names:
+### `showPlayerId`
+Appends the server ID in parentheses to names in `#name#`, `#username#`:
 ```
 John Doe (42)
 ```
 
+### `useFrameworkName`
+Uses character name from the framework in `#name#` and `#char#` placeholders. ESX fetches from MySQL async; QBCore/QBox reads from the player object. Falls back to FXServer player name if unavailable.
+
+## Cooldowns
+
+```lua
+Config.Cooldowns = {
+    default = 0,
+}
+```
+
+Global per-command cooldown in seconds. `0` disables it. Override per command:
+
+```lua
+{ command = "me", cooldown = 1, ... }
+```
+
+Admins bypass cooldowns when `Config.AdminCheck` is configured.
+
+## Webhook Logging
+
+```lua
+Config.Webhook = {
+    enabled = false,
+    url     = "",
+    handler = nil,
+}
+```
+
+Logs every successful command execution.
+
+### Discord (built-in)
+
+Set `enabled = true` and provide a Discord webhook URL:
+
+```lua
+Config.Webhook = {
+    enabled = true,
+    url     = "https://discord.com/api/webhooks/...",
+}
+```
+
+### Custom handler
+
+Set `handler` to a function to use your own logging system. When set, `url` is ignored entirely:
+
+```lua
+Config.Webhook = {
+    enabled = true,
+    handler = function(source, message, command, args)
+        exports['my-logger']:log(source, command.command, message)
+    end,
+}
+```
+
 ## Callbacks
 
-### onCommandExecuted
+### `onCommandExecuted`
 
 ```lua
 Config.Callbacks.onCommandExecuted = function(source, message, command, args, raw)
-    -- Fire after any command executes
 end
 ```
 
-Useful for logging, analytics, or triggering side effects.
+Fires after every successful command broadcast.
 
-Parameters:
-- `source`: Player ID
-- `message`: Formatted command message
-- `command`: Command definition table
-- `args`: Argument table (split by spaces)
-- `raw`: Raw input string from RegisterCommand
+### `onCommandFailed`
 
+```lua
+Config.Callbacks.onCommandFailed = function(source, reason, command, args, raw)
+end
+```
 
+Fires when a command is blocked. `reason` values:
 
-## Example Override
+| Value | Cause |
+|-------|-------|
+| `prereq` | `command.prereq` returned false |
+| `permission` | `Config.AdminCheck` returned false |
+| `cooldown` | Player triggered cooldown |
+| `invalid_args` | Argument type or length validation failed |
+| `no_args` | Command requires args but none were given |
 
-Edit `system/config.lua`:
+## Full Example
 
 ```lua
 Config.Framework = 'qbcore'
-Config.Logging = false
-Config.CheckUpdates = false
+Config.Logging   = false
 
 Config.AdminCheck = function(source)
-    local player = exports['qb-core']:GetPlayer(source)
+    local player = exports['qb-core']:GetCoreObject().Functions.GetPlayer(source)
     return player and player.PlayerData.job.grade.name == 'boss'
 end
 
 Config.Formatting.useFrameworkName = true
-Config.Formatting.showPlayerId = false
+Config.Formatting.showPlayerId     = false
 
-Config.Callbacks.onCommandExecuted = function(source, message, command, args, raw)
-    exports['qb-log']:logCommand(source, command.command, args)
+Config.Cooldowns.default = 1
+
+Config.Webhook = {
+    enabled = true,
+    handler = function(source, message, command, args)
+        exports['qb-log']:logCommand(source, command.command, args)
+    end,
+}
+
+Config.Callbacks.onCommandFailed = function(source, reason, command)
+    if reason == 'permission' then
+        TriggerClientEvent('pxc:notify', source, 'Access denied.', 'error')
+    end
 end
 ```

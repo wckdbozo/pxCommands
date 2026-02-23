@@ -10,7 +10,11 @@ function shallowcopy(orig)
     if orig_type == 'table' then
         copy = {}
         for orig_key, orig_value in pairs(orig) do
-            copy[orig_key] = orig_value
+            if type(orig_value) == 'table' then
+                copy[orig_key] = shallowcopy(orig_value)
+            else
+                copy[orig_key] = orig_value
+            end
         end
     else
         copy = orig
@@ -23,9 +27,12 @@ QBCore = nil
 
 if Config.Framework == 'esx' then
     log('Enabling ESX compatibility')
-    while not ESX do
+    local ok = pcall(function()
+        ESX = exports['es_extended']:getSharedObject()
+    end)
+    if not ok or not ESX then
+        AddEventHandler('esx:getSharedObject', function(obj) ESX = obj end)
         TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-        Citizen.Wait(0)
     end
     log('ESX enabled')
 elseif Config.Framework == 'qbcore' or Config.Framework == 'qbox' then
@@ -59,13 +66,17 @@ local function AddAlias(alias, commandName)
     return false
 end
 
+function AddCommandAlias(alias, commandName)
+    return AddAlias(alias, commandName)
+end
+
 function CommandPack(packName, packAuthor, commands, defaults, aliases)
     for _, command in next, commands do
         command.author = packAuthor
         command.pack = packName
         if defaults then
             for default, value in next, defaults do
-                if not command[default] then
+                if command[default] == nil then
                     command[default] = value
                 end
             end

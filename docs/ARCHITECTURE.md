@@ -8,21 +8,25 @@ system/
 ├── server/
 │   ├── pre.lua                  Initialization, framework setup, helpers
 │   └── commands.lua             Command registration and handler
-├── client/
-│   └── proximity.lua            Range-based message broadcast
 └── versioncheck.lua             Update checking and autoupdate
 modules/
-└── cl_*.lua                     Client modules (auto-loaded)
+├── cl_overhead_text.lua         Floating 3D text above players
+└── cl_notifications.lua         Screen notification module
 commands/
-└── *.lua                        Command packs (auto-loaded)
+├── example.lua                  Example command pack
+├── roleplay.lua                 Built-in RP commands (/me, /do, /ooc, etc.)
+└── admin.lua                    Built-in admin commands (/announce, /kick, etc.)
 ```
 
 ## Execution Order
 
-1. `fxmanifest.lua` loads all scripts in order
-2. `system/config.lua` initializes Config table
+1. `system/config.lua` — Config table initialized (shared)
+2. `system/server/pre.lua` — Helpers, framework init, `COMMANDS` table, `CommandPack` defined
+3. `commands/*.lua` — All command packs registered into `COMMANDS`
+4. `system/server/commands.lua` — Commands registered with FXServer, handler logic
+5. `system/versioncheck.lua` — Async update check
 
-**Client:** `modules/cl_*.lua` client modules load in parallel with server
+**Client:** `modules/cl_*.lua` loads independently after `system/config.lua`
 
 ## Data Flow
 
@@ -33,22 +37,30 @@ Player types /command args
       ↓
 RegisterCommand handler fires
       ↓
-commandHandler validates and processes
+commandHandler: prereq → permission → cooldown → arg validation
       ↓
-Framework checks (Admin, Permissions)
+Name resolution (sync for QBCore, async for ESX)
       ↓
-Command callback or broadcast
+formatString substitutes #tokens#
       ↓
-onCommandExecuted hook (if set)
+Global broadcast or server-side proximity filter
+      ↓
+cb / onCommandExecuted / sendWebhook
 ```
 
-### Message Broadcasting
+### Proximity Filtering
 
-**Global:**
-`TriggerClientEvent("chat:addMessage")` → All players
+All proximity filtering is server-side. `triggerProximityMessage` iterates
+`GetPlayers()`, measures distance between peds, and sends `chat:addMessage`
+only to players within range. No client event is involved.
 
-**Proximity:**
-`TriggerClientEvent("pxc:proximity")` → Server triggers client proximity check
+### Notifications
+
+```
+TriggerClientEvent("pxc:notify", targetId, message, type)
+      ↓
+cl_notifications.lua draws a NUI notification with color prefix
+```
 
 ## Configuration
 
@@ -56,58 +68,60 @@ Config is a global shared table. Modify in `system/config.lua`.
 
 ## Security Model
 
-- **Server-side validation** — All admin/permission checks enforced on server
+- **Server-side validation** — All checks (admin, cooldown, args) enforced on server
 - **Admin callback** — `Config.AdminCheck(source)` allows custom logic
-- **Framework delegation** — Admin checks delegate to ESX/QBCore if available
-- **Audit hooks** — `Config.Callbacks.onCommandExecuted` logs all command use
+- **prereq vs permission** — `prereq` failures are silent; permission failures show `noperm`
+- **Audit hooks** — `onCommandExecuted` and `onCommandFailed` for full observability
+- **Net event guards** — `pxc:showFloatingText` and `pxc:notify` reject client-relayed calls
+- **Webhook logging** — Optional Discord embed or custom handler via `Config.Webhook`
 
 ## Framework Integration
 
 ### ESX
 - Admin commands registered via `es:addGroupCommand`
-- Player identity fetched from MySQL users table
-- Character name used in formatting when available
+- Framework object via `exports['es_extended']:getSharedObject()` with legacy event fallback
+- Character name fetched async via `MySQL.Async.fetchAll`
 
 ### QBCore/QBox
-- Player object retrieved via `QBCore.Functions.GetPlayer(source)`
+- Player object via `QBCore.Functions.GetPlayer(source)`
 - Character info from `PlayerData.charinfo`
-- Admin check left to ACL/command definition
+- Admin check via ACL or `Config.AdminCheck`
 
 ### Standalone
-- All admin checks via FXServer ACL
+- Admin checks use FXServer ACL (`IsPlayerAceAllowed`)
 - Player name from `GetPlayerName(source)`
-- No framework-specific callbacks
 
 ## Extending pxCommands
 
 ### Custom Command Packs
 
-The primary extension method is creating command packs in `commands/*.lua`:
-
 ```lua
-CommandPack("MyCustom", "AuthorName", {
+CommandPack("MyPack", "AuthorName", {
     {
-        command = "mycommand",
-        help = "My custom command",
-        format = "#username# did something",
+        command  = "mycommand",
+        help     = "My custom command",
+        format   = "#name# did something: #message#",
+        cooldown = 5,
         cb = function(source, message, command, args, raw)
-            -- Your custom logic here
         end
     }
 })
 ```
 
-See [COMMAND_PACKS.md](./COMMAND_PACKS.md) for detailed documentation.
+See [COMMAND_PACKS.md](./COMMAND_PACKS.md) for full field reference.
 
 ### Custom Modules
 
-To add custom server or shared modules, manually add them to `fxmanifest.lua`:
+Client modules are auto-loaded by the `modules/cl_*.lua` glob. Add a file matching
+that pattern and it will be included automatically — no manifest changes required.
+
+For server modules, add them manually to `fxmanifest.lua`:
 
 ```lua
 server_scripts {
     'system/server/pre.lua',
     'commands/*.lua',
-    'modules/my_custom_module.lua',  -- Add here
+    'modules/sv_mymodule.lua',
     'system/server/commands.lua',
     'system/versioncheck.lua'
 }
@@ -117,7 +131,6 @@ server_scripts {
 
 ```lua
 Config.AdminCheck = function(source)
-    -- Return true if player is admin
     return exports['your-acl']:isAdmin(source)
 end
 ```
@@ -128,42 +141,42 @@ end
 Config.Callbacks.onCommandExecuted = function(source, message, command, args, raw)
     if command.admin then
         TriggerEvent('audit:log', {
-            action = 'command',
-            player = GetPlayerName(source),
+            action  = 'command',
+            player  = GetPlayerName(source),
             command = command.command,
-            args = args,
+            args    = args,
         })
     end
+end
+
+Config.Callbacks.onCommandFailed = function(source, reason, command, args, raw)
+    -- reason: "prereq" | "permission" | "cooldown" | "invalid_args" | "no_args"
 end
 ```
 
 ## Performance
 
 - Framework detection runs once at startup
-- No periodic polling; event-driven
-- Command handler is lightweight (no loops)
-- Proximity check runs only for ranged messages
-- Identity lookups cached by game engine
+- No periodic polling; fully event-driven
+- Proximity filtering done server-side — only recipients get the network event
+- ESX name lookup is async (non-blocking)
+- `cl_overhead_text.lua` thread yields at 500ms when no entries are active
+- Cooldown tracker cleaned up on `playerDropped`
 
 ## Known Limitations
 
-- Command names must be unique (no duplication across packs)
-- Proximity calculation is range-based, not los-based
-- vRP not supported (use ESX, QBCore, QBox, or standalone)
+- Command names must be unique across all packs
+- Proximity is range-based sphere, not line-of-sight
+- vRP not supported
 
 ## Version Management
 
-The resource uses GitHub releases for version tracking:
-
-- **Production builds**: Tagged releases on GitHub (e.g., `v1.0.0`)
-- **Development builds**: Identified as "dev" if no releases exist
-- **Version check**: Automatic HTTP request to GitHub Releases API at startup
-- **Autoupdate**: Command-based update that directs to latest release download
-
-Set `Config.CheckUpdates = false` to disable automatic version checking.
+- Version read from `fxmanifest.lua` via `GetResourceMetadata`
+- Compared against GitHub Releases API using semantic versioning
+- Set `Config.CheckUpdates = false` to disable
+- Use `/pxCommands autoupdate` to check manually
 
 ## References
 
-- [MIGRATION.md](MIGRATION.md) — Upgrade from chat_commands
-- [SECURITY.md](../.github/SECURITY.md) — Security policies
-- [CONTRIBUTING.md](../.github/CONTRIBUTING.md) — Development guidelines
+- [SECURITY.md](../.github/SECURITY.md)
+- [CONTRIBUTING.md](../.github/CONTRIBUTING.md)

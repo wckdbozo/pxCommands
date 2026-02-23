@@ -5,30 +5,27 @@
 **Problem**: `/command` returns "Unknown command"
 
 **Check**:
-1. Is the resource started? `status` in server console
-2. Does `commands/` folder exist with `.lua` files?
+1. Is the resource started? Run `status` in the server console
+2. Does `commands/` contain `.lua` files?
 3. Check server logs for `Registering command` messages
 4. Restart with `restart pxCommands`
 
-## Permissions Not Working
+## Admin Commands Work for Everyone
 
-**Problem**: Admin commands work for everyone
+**Problem**: Players without admin can use admin-gated commands
 
-**Solution**: Configure `Config.AdminCheck` in `system/config.lua`:
+**Solution**: `Config.AdminCheck` is `nil` by default. Set it in `system/config.lua`:
 
 ```lua
 Config.AdminCheck = function(source)
-    -- ESX
     if Config.Framework == 'esx' and ESX then
         local player = ESX.GetPlayerFromId(source)
         return player and player.getGroup() == 'admin'
     end
-    -- QBCore
     if Config.Framework == 'qbcore' and QBCore then
         local player = QBCore.Functions.GetPlayer(source)
         return player and player.PlayerData.job.name == 'police'
     end
-    -- Fallback
     return IsPlayerAceAllowed(source, "command")
 end
 ```
@@ -39,80 +36,73 @@ end
 
 **Requirements**:
 - `Config.Formatting.useFrameworkName = true`
-- ESX: MySQL-async running and users table accessible
-- QBCore/QBox: Player data loaded
+- ESX: `mysql-async` or `oxmysql` running and `users` table populated
+- QBCore/QBox: Player data fully loaded (not in character select)
+
+## Proximity Chat Sending to Everyone
+
+**Problem**: Commands with `range` still broadcast globally
+
+**Cause**: The server-side ped may not be valid at dispatch time (player not fully spawned)
+
+**Check**: Ensure the player is spawned before running the command. The handler guards against a nil/zero ped and skips the message if so.
+
+## ESX Character Name Shows Blank
+
+**Problem**: `#char#` renders as an empty string
+
+**Cause**: MySQL returned an empty result for the player's identifier
 
 **Check**:
-- Is ESX character selection working?
-- Does MySQL have user data populated?
-- Is player fully loaded (not in character select)?
+1. Verify `GetPlayerIdentifiers(source)` returns a valid identifier
+2. Confirm the user row exists in the `users` table
+3. Ensure `firstname` and `lastname` columns are not NULL
 
-## Proximity Chat Broadcasting to Everyone
+## Cooldown Firing for Admins
 
-**Problem**: `range = 30` messages still broadcast globally
+**Problem**: Admins are still subject to command cooldowns
 
-**Cause**: Client-side proximity handler not loaded
+**Solution**: Ensure `Config.AdminCheck` is configured and returns `true` for admin players. The cooldown bypass only activates when `Config.AdminCheck` is set.
 
-**Fix**: Ensure `system/client/proximity.lua` is loaded. Check server logs.
+## Webhook Not Sending
 
-## MySQL Query Errors
-
-**Problem**: Console shows "MySQL not initialized" but resource works
-
-**This is normal**: MySQL-async is optional. The resource guards its usage and continues without it.
-
-**To use MySQL**: Ensure `mysql-async` is `ensure`d before `pxCommands` in server.cfg
-
-## ESX Character Name Shows Empty
-
-**Problem**: `#char#` shows blank space
-
-**Cause**: MySQL fetch returned empty result
+**Problem**: Discord embeds not appearing
 
 **Check**:
-1. Is identifier correct? Check `GetPlayerIdentifiers(source)`
-2. Does user exist in database?
-3. Is firstname/lastname populated (not NULL)?
+1. `Config.Webhook.enabled = true`
+2. `Config.Webhook.url` is a valid Discord webhook URL
+3. If `Config.Webhook.handler` is set, the `url` field is ignored — use one or the other
+4. Check server console for HTTP errors from `PerformHttpRequest`
 
-## FXServer Version Warning
+## MySQL Errors on Startup
 
-**Problem**: Server console shows "Unsupported FXServer version"
+**Problem**: Console shows MySQL-related errors but commands still work
 
-**Solution**: Update FXServer to build 1226 or newer
+**This is expected**: MySQL usage is optional and guarded. The resource continues without it. ESX character name lookup falls back to the FXServer player name silently.
 
-## Commands Loaded Twice
-
-**Problem**: Command registered twice (logs show duplicate registrations)
-
-**Cause**: Same command defined in multiple pack files
-
-**Fix**: Ensure unique command names across all `commands/` files
-
-## Framework Not Detected
-
-**Problem**: `Config.Framework` shows as detected but features fail
-
-**Solution**: Check `system/config.lua` settings:
-
-```lua
-Config.Framework = 'esx'  -- Explicitly set the framework
-```
-
-Do not rely on auto-detection if overriding in settings.
+**To use MySQL**: Ensure `mysql-async` or `oxmysql` is `ensure`d before `pxCommands` in `server.cfg`.
 
 ## Version Check Fails
 
-**Problem**: `/pxCommands autoupdate` shows error
+**Problem**: Startup shows an error or always reports outdated
 
 **Possible causes**:
-1. No GitHub releases tagged yet (run `git tag v0.1.0` and push)
-2. Server has no internet access
-3. Rate-limited by GitHub API
+1. No GitHub releases tagged yet
+2. Server has no outbound internet access
+3. GitHub API rate limit hit
 
-**Check**: Enable `Config.Logging = true` and review startup messages
+Set `Config.CheckUpdates = false` to disable.
+
+## Commands Registered Twice
+
+**Problem**: Logs show duplicate registrations for the same command
+
+**Cause**: Same command name defined in multiple pack files
+
+**Fix**: Ensure unique `command` values across all files in `commands/`
 
 ## Uninstalling or Updating
 
-1. Stop resource: `stop pxCommands`
-2. Replace resource folder with new version
-3. Start: `start pxCommands`
+1. `stop pxCommands`
+2. Replace the resource folder with the new version (use the zip from GitHub Releases or `build.ps1`)
+3. `start pxCommands`

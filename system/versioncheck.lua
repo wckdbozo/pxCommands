@@ -3,12 +3,33 @@ if Config and Config.CheckUpdates then
     Citizen.CreateThread(function()
         local owner = "CodeMeAPixel"
         local repo = "pxCommands"
+        local resourceName = GetCurrentResourceName()
+        
+        local function parseVersion(versionStr)
+            local parts = {}
+            for part in versionStr:gmatch("(%d+)") do
+                table.insert(parts, tonumber(part))
+            end
+            return parts
+        end
         
         local function compareVersions(current, latest)
-            if current == "dev" or latest == "dev" then
-                return current ~= latest
+            local currentParts = parseVersion(current)
+            local latestParts = parseVersion(latest)
+            
+            local maxLen = math.max(#currentParts, #latestParts)
+            for i = 1, maxLen do
+                currentParts[i] = currentParts[i] or 0
+                latestParts[i] = latestParts[i] or 0
+                
+                if currentParts[i] < latestParts[i] then
+                    return true
+                elseif currentParts[i] > latestParts[i] then
+                    return false
+                end
             end
-            return tonumber(current) and tonumber(latest) and tonumber(current) < tonumber(latest)
+            
+            return false
         end
         
         local function getLatestRelease(callback)
@@ -21,22 +42,18 @@ if Config and Config.CheckUpdates then
                     if success and result then
                         callback(result)
                     else
-                        callback("dev")
+                        callback(nil)
                     end
                 else
-                    callback("dev")
+                    callback(nil)
                 end
             end, "GET")
         end
         
         getLatestRelease(function(latestVersion)
-            local currentVersion = "dev"
-            local versionFile = LoadResourceFile(GetCurrentResourceName(), "version")
-            if versionFile then
-                currentVersion = versionFile:match("^%s*(.-)%s*$")
-            end
+            local currentVersion = GetResourceMetadata(resourceName, "version", 0) or "0.1.0"
             
-            if compareVersions(currentVersion, latestVersion) then
+            if latestVersion and compareVersions(currentVersion, latestVersion) then
                 log("Resource is outdated")
                 log("Current: " .. currentVersion .. " | Latest: " .. latestVersion)
                 log("Download from: https://github.com/" .. owner .. "/" .. repo .. "/releases")
@@ -52,6 +69,7 @@ RegisterCommand(GetCurrentResourceName(), function(_, args)
         log("Checking for latest release...")
         local owner = "CodeMeAPixel"
         local repo = "pxCommands"
+        local resourceName = GetCurrentResourceName()
         
         PerformHttpRequest("https://api.github.com/repos/" .. owner .. "/" .. repo .. "/releases/latest", function(code, response, headers)
             if code ~= 200 then
@@ -68,13 +86,17 @@ RegisterCommand(GetCurrentResourceName(), function(_, args)
                 return
             end
             
+            local currentVersion = GetResourceMetadata(resourceName, "version", 0) or "unknown"
+            local latestVersion = releaseData.tag_name:gsub("^v", "") or "unknown"
             local downloadUrl = releaseData.zipball_url
+            
             if not downloadUrl then
                 log("No download URL found in release")
                 return
             end
             
-            log("Downloading release " .. (releaseData.tag_name or "latest") .. "...")
+            log("Current version: " .. currentVersion .. " | Latest version: " .. latestVersion)
+            log("Downloading release " .. latestVersion .. "...")
             PerformHttpRequest(downloadUrl, function(code, zipData, headers)
                 if code ~= 200 then
                     log("Failed to download release: HTTP " .. code)
@@ -82,7 +104,7 @@ RegisterCommand(GetCurrentResourceName(), function(_, args)
                 end
                 
                 log("Downloaded release successfully")
-                log("Please manually extract and restart: /restart " .. GetCurrentResourceName())
+                log("Please manually extract and restart: /restart " .. resourceName)
             end, "GET")
         end, "GET")
     else
