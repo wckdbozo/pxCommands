@@ -42,10 +42,10 @@ pxCommands uses a modular client side architecture. You can easily extend how pl
 | :--- | :--- |
 | [Getting Started](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/getting-started) | Full installation and framework setup. |
 | [Command Packs](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/command-packs) | How to write and register new commands. |
-| [Config Reference]([docs/CONFIG_REFERENCE.md](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/configuration)) | Deep dive into config.lua settings. |
-| [Module Reference]([docs/ARCHITECTURE.md](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/modules)) | Technical flow and module breakdown. |
+| [Config Reference](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/configuration) | Deep dive into config.lua settings. |
+| [Module Reference](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/modules) | Introduction to our module system. |
+| [Troubleshooting](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/troubleshooting) | Common issues and information |
+| [Architecture](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/architecture) | Technical flow and module breakdown. |
 
 ## Open-Source License
 This project is licensed under the GNU Affero General Public License v3.0. See the [LICENSE](./LICENSE) file for details.
-
-
