@@ -33,16 +33,18 @@ pxCommands uses a modular client side architecture. You can easily extend how pl
 | **Notifications** | Colored screen alerts | `pxc:notify` |
 | **Overhead Text** | Floating 3D text | `pxc:showFloatingText` |
 
+
 ---
 
 ## Documentation
 
 | Resource | Description |
 | :--- | :--- |
-| [Introduction]([docs/GETTING_STARTED.md](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/intro)) | Full installation and framework setup. |
+| [Getting Started](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/getting-started) | Full installation and framework setup. |
 | [Command Packs]([docs/COMMAND_PACKS.md](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/command-packs)) | How to write and register new commands. |
 | [Config Reference]([docs/CONFIG_REFERENCE.md](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/configuration)) | Deep dive into config.lua settings. |
 | [Module Reference]([docs/ARCHITECTURE.md](https://codemeapixel.dev/docs/scripts/fxserver/pxcommands/modules)) | Technical flow and module breakdown. |
 
 ## Open-Source License
 This project is licensed under the GNU Affero General Public License v3.0. See the [LICENSE](./LICENSE) file for details.
+
